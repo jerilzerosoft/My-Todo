@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, JSX } from 'react';
 import { Calendar, CheckSquare, Trash2, Plus, List, CheckCheck, Clock, Search, Filter, X, Bell, Star, MoreHorizontal, CheckCircle, Briefcase, User, ShoppingCart, Activity } from 'lucide-react';
 
 type Todo = {
@@ -116,36 +116,47 @@ export default function EnhancedTodo() {
     setFilteredTodos(filtered);
   };
 
-  const addTodo = (e) => {
+interface NewTodo {
+    id: number;
+    title: string;
+    completed: boolean;
+    category: string;
+    dueDate: string;
+    priority: 'low' | 'medium' | 'high';
+}
+
+interface AddTodoEvent extends React.FormEvent<HTMLFormElement> {}
+
+const addTodo = (e: AddTodoEvent): void => {
     e.preventDefault();
     if (!newTodo.title.trim()) return;
 
-    const todo = {
-      ...newTodo,
-      id: Date.now()
+    const todo: NewTodo = {
+        ...newTodo,
+        id: Date.now()
     };
 
     setTodos([...todos, todo]);
     showToast('Task added successfully!');
 
     setNewTodo({
-      id: 0,
-      title: '',
-      completed: false,
-      category: 'personal',
-      dueDate: '',
-      priority: 'medium'
+        id: 0,
+        title: '',
+        completed: false,
+        category: 'personal',
+        dueDate: '',
+        priority: 'medium'
     });
     
     setShowAddForm(false);
-  };
+};
 
-  const deleteTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id));
+const deleteTodo = (id: number): void => {
+    setTodos(todos.filter((todo: Todo) => todo.id !== id));
     showToast('Task deleted successfully!');
-  };
+};
 
-  const toggleComplete = (id) => {
+  const toggleComplete = (id: number): void => {
     setTodos(todos.map(todo => {
       if (todo.id === id) {
         const updatedTodo = { ...todo, completed: !todo.completed };
@@ -156,7 +167,11 @@ export default function EnhancedTodo() {
     }));
   };
 
-  const showToast = (message) => {
+interface ToastOptions {
+    message: string;
+}
+
+const showToast = (message: ToastOptions['message']): void => {
     if (typeof window === 'undefined') return;
     const toast = document.createElement('div');
     toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
@@ -164,10 +179,10 @@ export default function EnhancedTodo() {
     document.body.appendChild(toast);
 
     setTimeout(() => {
-      toast.classList.add('animate-fade-out');
-      setTimeout(() => toast.remove(), 300);
+        toast.classList.add('animate-fade-out');
+        setTimeout(() => toast.remove(), 300);
     }, 2000);
-  };
+};
 
   const getCompletionPercentage = () => {
     if (todos.length === 0) return 0;
@@ -183,16 +198,21 @@ export default function EnhancedTodo() {
     return todos.filter(todo => todo.completed && todo.category === 'work');
   };
 
-  const isOverdue = (todo) => {
+interface TodoItem {
+    dueDate: string;
+    completed: boolean;
+}
+
+const isOverdue = (todo: TodoItem): boolean => {
     if (!todo.dueDate || todo.completed) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const dueDate = new Date(todo.dueDate);
     dueDate.setHours(0, 0, 0, 0);
     return dueDate < today;
-  };
+};
 
-  const isDueToday = (todo) => {
+  const isDueToday = (todo:TodoItem): boolean => {
     if (!todo.dueDate || todo.completed) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -201,35 +221,50 @@ export default function EnhancedTodo() {
     return dueDate.getTime() === today.getTime();
   };
 
-  const getCategoryIcon = (category) => {
+
+
+interface CategoryIconProps {
+    category: string;
+
+}
+
+const getCategoryIcon = (category: CategoryIconProps['category']): JSX.Element => {
     switch (category) {
-      case 'work':
-        return <Briefcase size={16} className="text-blue-500" />;
-      case 'personal':
-        return <User size={16} className="text-purple-500" />;
-      case 'shopping':
-        return <ShoppingCart size={16} className="text-green-500" />;
-      case 'health':
-        return <Activity size={16} className="text-red-500" />;
-      default:
-        return <CheckSquare size={16} className="text-gray-500" />;
+        case 'work':
+            return <Briefcase size={16} className="text-blue-500" />;
+        case 'personal':
+            return <User size={16} className="text-purple-500" />;
+        case 'shopping':
+            return <ShoppingCart size={16} className="text-green-500" />;
+        case 'health':
+            return <Activity size={16} className="text-red-500" />;
+        default:
+            return <CheckSquare size={16} className="text-gray-500" />;
     }
-  };
+};
 
-  const getPriorityBadge = (priority) => {
+interface PriorityBadgeProps {
+    priority: 'low' | 'medium' | 'high';
+}
+
+const getPriorityBadge = (priority: PriorityBadgeProps['priority']): JSX.Element | null => {
     switch (priority) {
-      case 'high':
-        return <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">High</span>;
-      case 'medium':
-        return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Medium</span>;
-      case 'low':
-        return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Low</span>;
-      default:
-        return null;
+        case 'high':
+            return <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">High</span>;
+        case 'medium':
+            return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Medium</span>;
+        case 'low':
+            return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Low</span>;
+        default:
+            return null;
     }
-  };
+};
 
-  const formatDate = (dateString) => {
+interface FormatDateProps {
+    dateString: string;
+}
+
+const formatDate = (dateString: FormatDateProps['dateString']): string => {
     if (!dateString) return '';
     const date = new Date(dateString);
     const today = new Date();
@@ -242,30 +277,34 @@ export default function EnhancedTodo() {
     yesterday.setDate(yesterday.getDate() - 1);
     
     if (date.getTime() === today.getTime()) {
-      return 'Today';
+        return 'Today';
     } else if (date.getTime() === tomorrow.getTime()) {
-      return 'Tomorrow';
+        return 'Tomorrow';
     } else if (date.getTime() === yesterday.getTime()) {
-      return 'Yesterday';
+        return 'Yesterday';
     } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
-  };
+};
 
-  const getCategoryColor = (category) => {
+interface CategoryColorProps {
+    category: 'work' | 'personal' | 'shopping' | 'health' | string;
+}
+
+const getCategoryColor = (category: CategoryColorProps['category']): string => {
     switch (category) {
-      case 'work':
-        return 'border-blue-500 bg-blue-50';
-      case 'personal':
-        return 'border-purple-500 bg-purple-50';
-      case 'shopping':
-        return 'border-green-500 bg-green-50';
-      case 'health':
-        return 'border-red-500 bg-red-50';
-      default:
-        return 'border-gray-500 bg-gray-50';
+        case 'work':
+            return 'border-blue-500 bg-blue-50';
+        case 'personal':
+            return 'border-purple-500 bg-purple-50';
+        case 'shopping':
+            return 'border-green-500 bg-green-50';
+        case 'health':
+            return 'border-red-500 bg-red-50';
+        default:
+            return 'border-gray-500 bg-gray-50';
     }
-  };
+};
 
   const clearCompletedTasks = () => {
     if (window.confirm('Are you sure you want to clear all completed tasks?')) {
